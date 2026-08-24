@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"concrete-curing-maturity-monitor/backend/internal/dto"
 	"concrete-curing-maturity-monitor/backend/internal/service"
 	"concrete-curing-maturity-monitor/backend/internal/util"
@@ -22,7 +21,7 @@ func (handler *StrengthForecastHandler) List(c *gin.Context) {
 	page, size := util.Pagination(c)
 	sectionID, _ := strconv.ParseUint(c.Query("pour_section_id"), 10, 64)
 	seriesID, _ := strconv.ParseUint(c.Query("temperature_series_id"), 10, 64)
-	result, err := handler.service.List(context.Background(), dto.StrengthForecastQuery{
+	result, err := handler.service.List(c.Request.Context(), dto.StrengthForecastQuery{
 		PourSectionID: uint(sectionID), TemperatureSeriesID: uint(seriesID),
 		ForecastState: c.Query("forecast_state"), Page: page, PageSize: size,
 	})
@@ -38,7 +37,7 @@ func (handler *StrengthForecastHandler) Get(c *gin.Context) {
 	if !ok {
 		return
 	}
-	result, err := handler.service.Get(context.Background(), id)
+	result, err := handler.service.Get(c.Request.Context(), id)
 	if err != nil {
 		util.WriteError(c, err)
 		return

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"concrete-curing-maturity-monitor/backend/internal/dto"
 	"concrete-curing-maturity-monitor/backend/internal/service"
 	"concrete-curing-maturity-monitor/backend/internal/util"
@@ -20,7 +19,7 @@ func NewPourSectionHandler(value service.PourSectionService) *PourSectionHandler
 func (handler *PourSectionHandler) List(c *gin.Context) {
 	page, size := util.Pagination(c)
 	mixID, _ := strconv.ParseUint(c.Query("mix_design_id"), 10, 64)
-	result, err := handler.service.List(context.Background(), dto.PourSectionQuery{
+	result, err := handler.service.List(c.Request.Context(), dto.PourSectionQuery{
 		Search: strings.TrimSpace(c.Query("search")), CuringState: c.Query("curing_state"),
 		MixDesignID: uint(mixID), OwnerTeam: c.Query("owner_team"), Page: page, PageSize: size,
 	})
@@ -36,7 +35,7 @@ func (handler *PourSectionHandler) Get(c *gin.Context) {
 	if !ok {
 		return
 	}
-	result, err := handler.service.Get(context.Background(), id)
+	result, err := handler.service.Get(c.Request.Context(), id)
 	if err != nil {
 		util.WriteError(c, err)
 		return
