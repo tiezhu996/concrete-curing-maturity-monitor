@@ -57,7 +57,7 @@ type RateLimiter struct {
 }
 
 func NewRateLimiter(limit int, window time.Duration) *RateLimiter {
-	return &RateLimiter{limit: limit, window: window}
+	return &RateLimiter{limit: limit, window: window, entries: make(map[string]rateWindow)}
 }
 
 func (limiter *RateLimiter) Middleware(scope string) gin.HandlerFunc {

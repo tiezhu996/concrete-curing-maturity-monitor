@@ -137,7 +137,7 @@ func seed(database *gorm.DB) error {
 			MixCode: "C35-P42", Version: 3, CementType: "CEM II/A-L 42.5 R",
 			WaterBinderRatio: 0.42, DatumTemperatureC: 0,
 			CalibrationPointsJSON: string(calibration), ValidFrom: &validFrom,
-			DesignState: constants.MixDraft, CreatedBy: lab.ID,
+			DesignState: constants.MixPublished, CreatedBy: lab.ID,
 			CreatedByName: lab.DisplayName, LockVersion: 1,
 		}
 		if err := tx.Create(&mix).Error; err != nil {
@@ -147,7 +147,8 @@ func seed(database *gorm.DB) error {
 		section := model.PourSection{
 			SectionCode: "B2-W07", Name: "Basement wall lift 07", StructurePart: "North retaining wall",
 			VolumeM3: 86.4, MixDesignID: mix.ID,
-			TargetStrengthMPA: 28, CuringState: string(constants.CuringPrepared),
+			TargetStrengthMPA: 28, CuringState: string(constants.CuringActive),
+			PouredAt: &pouredAt,
 			OwnerTeam: "Civil works A", Version: 1,
 		}
 		if err := tx.Create(&section).Error; err != nil {
@@ -161,11 +162,15 @@ func seed(database *gorm.DB) error {
 		if err != nil {
 			return err
 		}
+		analysis, err := timeseries.Analyze(points, 120)
+		if err != nil {
+			return fmt.Errorf("analyze seed temperature series: %w", err)
+		}
 		series := model.TemperatureSeries{
 			PourSectionID: section.ID, SensorCode: "TC-B2-W07-A", SampleIntervalMin: 120,
-			PointsJSON: encoded, StartedAt: points[0].Timestamp, EndedAt: points[len(points)-1].Timestamp,
-			SourceChecksum: checksum, MissingRatio: 0.5, SeriesState: constants.SeriesImported,
-			QualityNote: "",
+			PointsJSON: encoded, StartedAt: analysis.StartedAt, EndedAt: analysis.EndedAt,
+			SourceChecksum: checksum, MissingRatio: analysis.MissingRatio, SeriesState: constants.SeriesUsable,
+			QualityNote: analysis.QualityNote + "; confirmed: seed demonstration data",
 			ImportedBy:  lab.ID, ImportedByName: lab.DisplayName,
 		}
 		if err := tx.Create(&series).Error; err != nil {
