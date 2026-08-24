@@ -31,14 +31,11 @@ type MaturityResult struct {
 	Steps         []MaturityStep `json:"steps"`
 }
 
-var sharedMaturitySteps []MaturityStep
-
 func CalculateMaturity(points []TemperaturePoint, datumTemperatureC float64) (MaturityResult, error) {
 	if len(points) < 2 {
 		return MaturityResult{}, fmt.Errorf("at least two temperature points are required")
 	}
-	sharedMaturitySteps = sharedMaturitySteps[:0]
-	result := MaturityResult{}
+	result := MaturityResult{Steps: make([]MaturityStep, 0, len(points)-1)}
 	for index := 1; index < len(points); index++ {
 		previous := points[index-1]
 		current := points[index]
@@ -55,7 +52,7 @@ func CalculateMaturity(points []TemperaturePoint, datumTemperatureC float64) (Ma
 		contribution := effective * duration
 		result.DegreeHours += contribution
 		result.DurationHours += duration
-		sharedMaturitySteps = append(sharedMaturitySteps, MaturityStep{
+		result.Steps = append(result.Steps, MaturityStep{
 			Index: index, From: previous.Timestamp, To: current.Timestamp,
 			FromTemperatureC: previous.TemperatureC, ToTemperatureC: current.TemperatureC,
 			AverageTemperature: round(average, 4), DatumTemperatureC: datumTemperatureC,
@@ -63,7 +60,6 @@ func CalculateMaturity(points []TemperaturePoint, datumTemperatureC float64) (Ma
 			RunningMaturity: round(result.DegreeHours, 6), BelowDatumClamped: clamped,
 		})
 	}
-	result.Steps = sharedMaturitySteps
 	result.DegreeHours = round(result.DegreeHours, 6)
 	result.DurationHours = round(result.DurationHours, 6)
 	return result, nil

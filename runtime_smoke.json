@@ -9,6 +9,9 @@
     "JWT_SECRET": "runtime-smoke-only-change-me"
   },
   "ready_url": "http://127.0.0.1:20535/healthz",
-  "ready_status": [200],
-  "startup_timeout": 30
+  "ready_status": [
+    200
+  ],
+  "startup_timeout": 30,
+  "project_intro": "基于 Go 实现的混凝土养护成熟度监测 Web 项目，一款后端服务，完成浇筑区段与配合比维护、养护温度序列导入校验、成熟度计算与强度阈值预测。"
 }

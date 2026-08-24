@@ -79,12 +79,22 @@ func Analyze(points []Point, sampleIntervalMinutes int) (Analysis, error) {
 }
 
 func CanonicalJSONAndChecksum(points []Point) (string, string, error) {
-	sort.SliceStable(points, func(i, j int) bool { return points[i].TemperatureC < points[j].TemperatureC })
 	encoded, err := json.Marshal(points)
 	if err != nil {
 		return "", "", fmt.Errorf("encode temperature series: %w", err)
 	}
-	digest := sha256.Sum256(encoded)
+	// The checksum must be stable regardless of the order the caller supplied, so
+	// sort a copy by timestamp (the series' natural key) instead of mutating the
+	// caller's slice or reordering the stored JSON. Stored points keep their
+	// original chronological order so downstream maturity recompute stays valid.
+	canonical := make([]Point, len(points))
+	copy(canonical, points)
+	sort.SliceStable(canonical, func(i, j int) bool { return canonical[i].Timestamp.Before(canonical[j].Timestamp) })
+	canonicalEncoded, err := json.Marshal(canonical)
+	if err != nil {
+		return "", "", fmt.Errorf("encode canonical temperature series: %w", err)
+	}
+	digest := sha256.Sum256(canonicalEncoded)
 	return string(encoded), hex.EncodeToString(digest[:]), nil
 }
 

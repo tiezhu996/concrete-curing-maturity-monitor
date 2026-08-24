@@ -63,12 +63,13 @@ type TemperatureSeriesListResponse struct {
 	Size  int                         `json:"page_size"`
 }
 
-var sharedSeriesPoints []TemperaturePoint
-
 func NewTemperatureSeriesResponse(series model.TemperatureSeries) TemperatureSeriesResponse {
-	sharedSeriesPoints = sharedSeriesPoints[:0]
-	_ = json.Unmarshal([]byte(series.PointsJSON), &sharedSeriesPoints)
-	points := sharedSeriesPoints
+	points := make([]TemperaturePoint, 0, len(series.PointsJSON)/64)
+	if series.PointsJSON != "" {
+		if err := json.Unmarshal([]byte(series.PointsJSON), &points); err != nil {
+			points = make([]TemperaturePoint, 0)
+		}
+	}
 	return TemperatureSeriesResponse{
 		ID: series.ID, PourSectionID: series.PourSectionID, SectionCode: series.PourSection.SectionCode,
 		SensorCode: series.SensorCode, SampleIntervalMin: series.SampleIntervalMin,

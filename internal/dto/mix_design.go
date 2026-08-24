@@ -80,12 +80,13 @@ type MixDesignListResponse struct {
 	Size  int                 `json:"page_size"`
 }
 
-var sharedCalibrationPoints []CalibrationPoint
-
 func NewMixDesignResponse(design model.MixDesign, references int64) MixDesignResponse {
-	sharedCalibrationPoints = sharedCalibrationPoints[:0]
-	_ = json.Unmarshal([]byte(design.CalibrationPointsJSON), &sharedCalibrationPoints)
-	points := sharedCalibrationPoints
+	points := make([]CalibrationPoint, 0, len(design.CalibrationPointsJSON)/64)
+	if design.CalibrationPointsJSON != "" {
+		if err := json.Unmarshal([]byte(design.CalibrationPointsJSON), &points); err != nil {
+			points = make([]CalibrationPoint, 0)
+		}
+	}
 	return MixDesignResponse{
 		ID: design.ID, MixCode: design.MixCode, Version: design.Version,
 		CementType: design.CementType, WaterBinderRatio: design.WaterBinderRatio,

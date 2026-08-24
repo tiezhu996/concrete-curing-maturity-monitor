@@ -1,5 +1,6 @@
 # concrete-curing-maturity-monitor__004
 
+基于 Go 实现的混凝土养护成熟度监测 Web 项目，一款后端服务，完成浇筑区段与配合比维护、养护温度序列导入校验、成熟度计算与强度阈值预测。
 ## 构建镜像
 
 请从**仓库根目录**执行；`benzhi.Dockerfile`、`build_benzhi_docker.sh`、`BENZHI_README.md` 均固定在该目录：
