@@ -41,7 +41,7 @@ func (request *UpdatePourSectionRequest) Normalize() {
 }
 
 type TransitionPourSectionRequest struct {
-	ToState string `json:"to_state" binding:"required,oneof=poured curing suspended threshold_reached"`
+	ToState string `json:"to_state" binding:"required,oneof=poured curing suspended threshold_reached closed"`
 	Version int    `json:"version" binding:"required,min=1"`
 	Note    string `json:"note" binding:"required,min=3,max=1000"`
 }

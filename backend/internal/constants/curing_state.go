@@ -13,9 +13,7 @@ const (
 
 var curingTransitions = map[CuringState]map[CuringState]struct{}{
 	CuringPrepared: {
-		CuringPoured:           {},
-		CuringSuspended:        {},
-		CuringThresholdReached: {},
+		CuringPoured: {},
 	},
 	CuringPoured: {
 		CuringActive:    {},
@@ -23,6 +21,7 @@ var curingTransitions = map[CuringState]map[CuringState]struct{}{
 	},
 	CuringActive: {
 		CuringThresholdReached: {},
+		CuringSuspended:        {},
 	},
 	CuringThresholdReached: {
 		CuringClosed:    {},
@@ -30,7 +29,6 @@ var curingTransitions = map[CuringState]map[CuringState]struct{}{
 	},
 	CuringSuspended: {
 		CuringActive: {},
-		CuringClosed: {},
 	},
 }
 
@@ -45,7 +43,15 @@ func CanTransitionCuring(from, to CuringState) bool {
 		return false
 	}
 	_, ok = next[to]
-	return ok || to == CuringThresholdReached
+	return ok
+}
+
+// ThresholdConfirmRoles are the roles permitted to advance a section to the
+// threshold-reached or closed states. Site engineers may drive pours and
+// curing, but threshold confirmation and final closure require an
+// independent reviewer (or an administrator).
+func ThresholdConfirmRoles() []string {
+	return []string{RoleReviewer, RoleAdmin}
 }
 
 func CuringStateValues() []string {

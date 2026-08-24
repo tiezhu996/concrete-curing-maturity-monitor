@@ -176,7 +176,19 @@ func (service *pourSectionService) Transition(ctx context.Context, id uint, requ
 	if !constants.CanTransitionCuring(from, to) {
 		return dto.PourSectionResponse{}, util.NewError(http.StatusConflict, util.CodeInvalidTransition, "the requested curing state transition is not allowed")
 	}
+	if to == constants.CuringThresholdReached || to == constants.CuringClosed {
+		if !roleAllowed(constants.ThresholdConfirmRoles(), actor.Role) {
+			return dto.PourSectionResponse{}, util.NewError(http.StatusForbidden, util.CodeForbidden, "only a reviewer or administrator can confirm the threshold or close a pour section")
+		}
+	}
+	if to == constants.CuringPoured && before.PouredAt == nil {
+		pouredAt := service.now()
+		before.PouredAt = &pouredAt
+	}
 	updates := make(map[string]any)
+	if to == constants.CuringPoured && before.PouredAt != nil {
+		updates["poured_at"] = *before.PouredAt
+	}
 	changed, err := service.sections.Transition(ctx, id, request.Version, before.CuringState, request.ToState, updates)
 	if err != nil {
 		return dto.PourSectionResponse{}, util.WrapError(http.StatusInternalServerError, util.CodeInternal, "unable to transition pour section", err)
@@ -193,4 +205,13 @@ func (service *pourSectionService) Transition(ctx context.Context, id uint, requ
 	}
 	summary, _ := service.sections.Summary(ctx, id)
 	return dto.NewPourSectionResponse(after, summary), nil
+}
+
+func roleAllowed(allowed []string, role string) bool {
+	for _, candidate := range allowed {
+		if candidate == role {
+			return true
+		}
+	}
+	return false
 }
