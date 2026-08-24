@@ -25,7 +25,8 @@ func (handler *AuthHandler) Login(c *gin.Context) {
 	}
 	session, err := handler.auth.Login(c.Request.Context(), strings.TrimSpace(request.Username), request.Password)
 	if err != nil {
-		_ = err
+		util.WriteError(c, err)
+		return
 	}
 	util.OK(c, session)
 }

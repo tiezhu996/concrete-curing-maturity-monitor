@@ -46,9 +46,9 @@ func (recorder *AuditRecorder) Record(
 		Action: action, BeforeJSON: beforeJSON, AfterJSON: afterJSON,
 		MetadataJSON: metadataJSON, CreatedAt: time.Now().UTC(),
 	}
-	defer func() {
-		_ = recorder.db.WithContext(ctx).Create(&entry).Error
-	}()
+	if err := recorder.db.WithContext(ctx).Create(&entry).Error; err != nil {
+		return fmt.Errorf("persist audit log: %w", err)
+	}
 	return nil
 }
 

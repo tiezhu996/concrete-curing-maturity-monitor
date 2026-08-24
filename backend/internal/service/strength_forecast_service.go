@@ -301,6 +301,9 @@ func (service *strengthForecastService) Replay(ctx context.Context, id uint, act
 	passed := err == nil && encoded == forecast.InputSnapshot && inputHash == forecast.InputHash &&
 		math.Abs(result.MaturityDegreeHours-forecast.MaturityDegreeHours) < 0.000001 &&
 		math.Abs(result.PredictedStrengthMPA-forecast.PredictedStrengthMPA) < 0.000001
+	if replayErr := service.forecasts.UpdateReplay(ctx, id, passed); replayErr != nil {
+		return dto.StrengthForecastResponse{}, util.WrapError(http.StatusInternalServerError, util.CodeInternal, "unable to persist deterministic replay result", replayErr)
+	}
 	after, loadErr := service.forecasts.GetByID(ctx, id)
 	if loadErr != nil {
 		return dto.StrengthForecastResponse{}, util.WrapError(http.StatusInternalServerError, util.CodeInternal, "unable to reload replayed forecast", loadErr)
