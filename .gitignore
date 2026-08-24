@@ -1,0 +1,17 @@
+.env
+.DS_Store
+node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+coverage/
+*.log
+*.db
+*.db-shm
+*.db-wal
+backend/bin/
+.idea/
+.vscode/
