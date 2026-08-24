@@ -16,6 +16,6 @@ func RegisterStrengthForecastRoutes(api *gin.RouterGroup, value *handler.Strengt
 	group.POST("", middleware.RequirePermission(constants.PermissionForecastRun), limiter.Middleware("forecast-run"), value.Run)
 	group.POST("/:id/review", middleware.RequirePermission(constants.PermissionForecastReview), value.Review)
 	group.POST("/:id/confirm", middleware.RequirePermission(constants.PermissionForecastConfirm), value.Confirm)
-	group.POST("/:id/void", middleware.RequirePermission(constants.PermissionForecastReview), value.Void)
+	group.POST("/:id/void", middleware.RequirePermission(constants.PermissionForecastConfirm), value.Void)
 	group.POST("/:id/replay", middleware.RequirePermission(constants.PermissionForecastRun), limiter.Middleware("forecast-replay"), value.Replay)
 }

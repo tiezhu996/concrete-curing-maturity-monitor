@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"concrete-curing-maturity-monitor/backend/internal/dto"
 	"concrete-curing-maturity-monitor/backend/internal/service"
 	"concrete-curing-maturity-monitor/backend/internal/util"
@@ -22,7 +21,7 @@ func NewTemperatureSeriesHandler(value service.TemperatureSeriesService) *Temper
 func (handler *TemperatureSeriesHandler) List(c *gin.Context) {
 	page, size := util.Pagination(c)
 	sectionID, _ := strconv.ParseUint(c.Query("pour_section_id"), 10, 64)
-	result, err := handler.service.List(context.Background(), dto.TemperatureSeriesQuery{
+	result, err := handler.service.List(c.Request.Context(), dto.TemperatureSeriesQuery{
 		PourSectionID: uint(sectionID), SeriesState: c.Query("series_state"),
 		SensorCode: strings.TrimSpace(c.Query("sensor_code")), Page: page, PageSize: size,
 	})
@@ -38,7 +37,7 @@ func (handler *TemperatureSeriesHandler) Get(c *gin.Context) {
 	if !ok {
 		return
 	}
-	result, err := handler.service.Get(context.Background(), id)
+	result, err := handler.service.Get(c.Request.Context(), id)
 	if err != nil {
 		util.WriteError(c, err)
 		return
