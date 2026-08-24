@@ -1,0 +1,33 @@
+{
+  "name": "concrete-curing-maturity-monitor-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b --pretty false",
+    "test": "vitest run",
+    "audit:prod": "npm audit --omit=dev --audit-level=high --registry=https://registry.npmjs.org"
+  },
+  "dependencies": {
+    "antd": "5.20.6",
+    "echarts": "6.1.0",
+    "lucide-react": "0.441.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "7.18.2",
+    "zustand": "4.5.5"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "6.5.0",
+    "@testing-library/react": "16.0.1",
+    "@types/react": "18.3.7",
+    "@types/react-dom": "18.3.0",
+    "@vitejs/plugin-react": "4.7.0",
+    "jsdom": "25.0.0",
+    "typescript": "5.6.2",
+    "vite": "6.4.3",
+    "vitest": "3.2.7"
+  }
+}

@@ -1,0 +1,70 @@
+name: concrete-curing-maturity-monitor
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: concrete-curing-maturity-monitor-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    container_name: concrete-curing-maturity-monitor-backend
+    environment:
+      PORT: "8080"
+      DB_DRIVER: postgres
+      DB_DSN: ${DB_DSN}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRY: ${JWT_EXPIRY:-8h}
+      LOGIN_LIMIT_PER_MINUTE: ${LOGIN_LIMIT_PER_MINUTE:-30}
+      IMPORT_LIMIT_PER_MINUTE: ${IMPORT_LIMIT_PER_MINUTE:-30}
+      FORECAST_LIMIT_PER_MINUTE: ${FORECAST_LIMIT_PER_MINUTE:-60}
+      MAX_MISSING_RATIO: ${MAX_MISSING_RATIO:-0.10}
+    ports:
+      - "${BACKEND_PORT}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/healthz >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 8s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: concrete-curing-maturity-monitor-frontend
+    ports:
+      - "${FRONTEND_PORT}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1/healthz >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: concrete-curing-maturity-monitor-postgres-data
