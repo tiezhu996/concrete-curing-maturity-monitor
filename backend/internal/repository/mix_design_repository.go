@@ -47,7 +47,7 @@ func (repository *mixDesignRepository) List(ctx context.Context, query dto.MixDe
 func (repository *mixDesignRepository) GetByID(ctx context.Context, id uint) (model.MixDesign, error) {
 	var design model.MixDesign
 	if err := repository.db.WithContext(ctx).First(&design, id).Error; err != nil {
-		return model.MixDesign{}, fmt.Errorf("get mix design %d: %v", id, err)
+		return model.MixDesign{}, fmt.Errorf("get mix design %d: %w", id, err)
 	}
 	return design, nil
 }

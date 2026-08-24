@@ -5,7 +5,6 @@ import (
 	"concrete-curing-maturity-monitor/backend/internal/dto"
 	"concrete-curing-maturity-monitor/backend/internal/service"
 	"concrete-curing-maturity-monitor/backend/internal/util"
-	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -36,8 +35,7 @@ func (handler *MixDesignHandler) Get(c *gin.Context) {
 	}
 	result, err := handler.service.Get(c.Request.Context(), id)
 	if err != nil {
-		appError := util.NewError(http.StatusInternalServerError, util.CodeInternal, "unable to load mix design")
-		util.WriteError(c, appError)
+		util.WriteError(c, err)
 		return
 	}
 	util.OK(c, result)
@@ -54,8 +52,7 @@ func (handler *MixDesignHandler) Create(c *gin.Context) {
 	}
 	result, err := handler.service.Create(c.Request.Context(), request, actor)
 	if err != nil {
-		appError := util.NewError(http.StatusInternalServerError, util.CodeInternal, "unable to create mix design")
-		util.WriteError(c, appError)
+		util.WriteError(c, err)
 		return
 	}
 	util.Created(c, result)
@@ -76,8 +73,7 @@ func (handler *MixDesignHandler) Update(c *gin.Context) {
 	}
 	result, err := handler.service.Update(c.Request.Context(), id, request, actor)
 	if err != nil {
-		appError := util.NewError(http.StatusInternalServerError, util.CodeInternal, "unable to update mix design")
-		util.WriteError(c, appError)
+		util.WriteError(c, err)
 		return
 	}
 	util.OK(c, result)
@@ -106,8 +102,7 @@ func (handler *MixDesignHandler) transition(c *gin.Context, state string) {
 	}
 	result, err := handler.service.Transition(c.Request.Context(), id, state, request, actor)
 	if err != nil {
-		appError := util.NewError(http.StatusInternalServerError, util.CodeInternal, "unable to transition mix design")
-		util.WriteError(c, appError)
+		util.WriteError(c, err)
 		return
 	}
 	util.OK(c, result)
