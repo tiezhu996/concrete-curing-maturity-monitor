@@ -56,7 +56,7 @@ func (service *temperatureSeriesService) List(ctx context.Context, query dto.Tem
 func (service *temperatureSeriesService) Get(ctx context.Context, id uint) (dto.TemperatureSeriesResponse, error) {
 	series, err := service.series.GetByID(ctx, id)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.TemperatureSeriesResponse{}, util.NotFound("temperature series")
 		}
 		return dto.TemperatureSeriesResponse{}, util.WrapError(http.StatusInternalServerError, util.CodeInternal, "unable to load temperature series", err)
@@ -68,7 +68,7 @@ func (service *temperatureSeriesService) Import(ctx context.Context, request dto
 	request.Normalize()
 	section, err := service.sections.GetByID(ctx, request.PourSectionID)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.TemperatureSeriesResponse{}, util.NotFound("pour section")
 		}
 		return dto.TemperatureSeriesResponse{}, util.WrapError(http.StatusInternalServerError, util.CodeInternal, "unable to validate pour section", err)
@@ -124,7 +124,7 @@ func (service *temperatureSeriesService) Import(ctx context.Context, request dto
 func (service *temperatureSeriesService) Confirm(ctx context.Context, id uint, request dto.TemperatureSeriesActionRequest, actor util.Actor) (dto.TemperatureSeriesResponse, error) {
 	before, err := service.series.GetByID(ctx, id)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.TemperatureSeriesResponse{}, util.NotFound("temperature series")
 		}
 		return dto.TemperatureSeriesResponse{}, util.WrapError(http.StatusInternalServerError, util.CodeInternal, "unable to load temperature series", err)

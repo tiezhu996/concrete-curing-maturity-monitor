@@ -10,6 +10,7 @@ import (
 	"concrete-curing-maturity-monitor/backend/internal/util"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
@@ -53,7 +54,7 @@ func (service *mixDesignService) List(ctx context.Context, query dto.MixDesignQu
 func (service *mixDesignService) Get(ctx context.Context, id uint) (dto.MixDesignResponse, error) {
 	design, err := service.designs.GetByID(ctx, id)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.MixDesignResponse{}, util.NotFound("mix design")
 		}
 		return dto.MixDesignResponse{}, util.WrapError(http.StatusInternalServerError, util.CodeInternal, "unable to load mix design", err)
@@ -96,7 +97,7 @@ func (service *mixDesignService) Update(ctx context.Context, id uint, request dt
 	request.Normalize()
 	before, err := service.designs.GetByID(ctx, id)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.MixDesignResponse{}, util.NotFound("mix design")
 		}
 		return dto.MixDesignResponse{}, util.WrapError(http.StatusInternalServerError, util.CodeInternal, "unable to load mix design", err)
@@ -151,7 +152,7 @@ func (service *mixDesignService) Update(ctx context.Context, id uint, request dt
 func (service *mixDesignService) Transition(ctx context.Context, id uint, to string, request dto.MixDesignActionRequest, actor util.Actor) (dto.MixDesignResponse, error) {
 	before, err := service.designs.GetByID(ctx, id)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.MixDesignResponse{}, util.NotFound("mix design")
 		}
 		return dto.MixDesignResponse{}, util.WrapError(http.StatusInternalServerError, util.CodeInternal, "unable to load mix design", err)
